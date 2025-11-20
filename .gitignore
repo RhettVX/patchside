@@ -1,6 +1,8 @@
 # Specify filepatterns you want git to ignore.
 
 _game_/
-build/
+build*/
 PlanetSide_Latest.rar
 decomp/
+*.sublime-workspace
+Debug/
