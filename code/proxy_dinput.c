@@ -3,20 +3,25 @@
 #define UNICODE 1
 #include <windows.h>
 #include <stdio.h>
+#include <string.h>
 
-//static HANDLE global_stdout_handle;
+static HANDLE global_stdout_handle;
 
 typedef HRESULT DirectInput8Create_type(HINSTANCE, DWORD, REFIID, LPVOID*, LPUNKNOWN);
 
 HRESULT
 DirectInput8Create(HINSTANCE hinst, DWORD dwVersion, REFIID riidltf, LPVOID* ppvOut, LPUNKNOWN punkOuter)
         {
-        HMODULE dinput_module = LoadLibrary(L"dinput8_real.dll");
+        static HMODULE dinput_module;
+        if (dinput_module == 0)
+                dinput_module = LoadLibrary(L"C:\\Windows\\SysWOW64\\dinput8.dll");
         if (dinput_module == 0) {
                 MessageBox(0, L"Unable to load original module", 0, MB_OK | MB_ICONEXCLAMATION);
                 ExitProcess(1);
                 }
-        DirectInput8Create_type* DirectInput8Create_orig = (DirectInput8Create_type*)GetProcAddress(dinput_module, "DirectInput8Create");
+        static DirectInput8Create_type* DirectInput8Create_orig;
+        if (DirectInput8Create_orig == 0)
+                DirectInput8Create_orig = (DirectInput8Create_type*)GetProcAddress(dinput_module, "DirectInput8Create");
         if (DirectInput8Create_orig == 0) {
                 MessageBox(0, L"Unable to load original procedure", 0, MB_OK | MB_ICONEXCLAMATION);
                 ExitProcess(1);
@@ -29,11 +34,11 @@ BOOL WINAPI
 DllMain(HINSTANCE dll_instance, DWORD reason, LPVOID reserved)
         {
         if (reason == DLL_PROCESS_ATTACH) {
-                /*AllocConsole();
+                MessageBox(0, L"I got called", 0, MB_OK);
+                AllocConsole();
                 global_stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
                 freopen("CONOUT$", "w", stdout);
                 puts("yo\n");
-                */
                 }
         
         return TRUE;

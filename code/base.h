@@ -18,3 +18,5 @@ CT_ASSERT(sizeof (u32) == 4);
 
 typedef u32 uptr;
 CT_ASSERT(sizeof (void*) == sizeof (uptr));
+
+#define ASSERT(cond) if ((cond) == 0) *(int volatile*)0 = 0
