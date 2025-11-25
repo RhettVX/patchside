@@ -4,6 +4,7 @@ typedef int   i32;
 typedef unsigned char   u8;
 typedef unsigned short u16;
 typedef unsigned int   u32;
+typedef float f32;
 
 #define CT_ASSERT_2(cond, line) typedef u8 ct_assert_line_##line[((!!(cond)) * 2) - 1]
 #define CT_ASSERT_1(cond, line) CT_ASSERT_2(cond, line)

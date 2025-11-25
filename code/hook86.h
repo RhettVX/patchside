@@ -1,3 +1,23 @@
+void
+nop_mem(u8* target, u32 size) {
+        DWORD old_protect;
+        VirtualProtect(target, size, PAGE_EXECUTE_READWRITE, &old_protect);
+        memset(target, 0x90, size);
+        VirtualProtect(target, size, old_protect, &old_protect);
+        }
+
+void
+hook_jump_32(u8* target, u32 target_size, uptr dest) {
+        u8 jmp_stub[5] = { 0xe9, 0, 0, 0, 0 };
+        ASSERT(target_size >= sizeof jmp_stub);
+        DWORD old_protect;
+        VirtualProtect(target, target_size, PAGE_EXECUTE_READWRITE, &old_protect);
+        memset(target, 0x90, target_size);
+        target[0] = jmp_stub[0];
+        *(u32*)((uptr)target + 1) = dest - ((u32)target + sizeof jmp_stub);
+        VirtualProtect(target, target_size, old_protect, &old_protect);
+        }
+
 void*
 hook_trampoline_32(u8* target, u32 size, uptr our_func) {
         u8 jmp_stub[] = { 0xe9, 0, 0, 0, 0 };
