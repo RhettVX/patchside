@@ -12,10 +12,18 @@ static HANDLE global_stdout_handle;
 
 typedef HRESULT DirectInput8Create_type(HINSTANCE, DWORD, REFIID, LPVOID*, LPUNKNOWN);
 
+void print_stack(void) {
+        u32 local_var = 0x1337;
+        u32* ebp_ptr = ((uptr)&local_var)  ;
+        printf("ebp-4 %p: %x\n", &local_var, local_var);
+        printf('ebp   (prev sf) %p: %x\n", ')
+        }
+
 HRESULT
 DirectInput8Create(HINSTANCE hinst, DWORD dwVersion, REFIID riidltf, LPVOID* ppvOut, LPUNKNOWN punkOuter)
         {
         static HMODULE dinput_module;
+        print_stack();
         if (dinput_module == 0)
                 dinput_module = LoadLibrary(L"C:\\Windows\\SysWOW64\\dinput8.dll");
         if (dinput_module == 0) {
@@ -104,6 +112,8 @@ ATTEMPT_3(attempt_3_hook) {
         *y = 0;
         attempt_3_orig(this, xx, param_1);
         }
+
+
 
 #define ATTEMPT_4(name) void __fastcall name(void* this, void* xx, u32* param_1)
 typedef ATTEMPT_4(attempt_4_type);
