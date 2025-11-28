@@ -6,3 +6,8 @@ Fan patch attempts for the original PlanetSide.
 3. Run build_mouse_patch.bat.
 4. Copy dinput8.dll from build_mouse_patch\\ to your PlanetSide game folder.
 5. Run the game. A console window will open up alongside the game if it's working.
+
+- Vehicle steering wheels won't work.
+- Zoomed weapons are still busted.
+- I still feel stickiness to 2 axes.
+- Who knows what else is broken by this.
