@@ -23,6 +23,8 @@ CT_ASSERT(sizeof (void*) == sizeof (uptr));
 #define ASSERT(cond) if ((cond) == 0) *(int volatile*)0 = 0
 #define ZERO_STRUCT {0}
 
+#define EVAL(expr) printf("%s%10u%11d%#12x%2.6f\n", #expr, (u32)(expr), (i32)(expr), (u32)(expr), *(f32*)&(expr))
+
 typedef struct Stream Stream;
 struct Stream {
         u8* data;
