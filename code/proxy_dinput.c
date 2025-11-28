@@ -12,18 +12,18 @@ static HANDLE global_stdout_handle;
 
 typedef HRESULT DirectInput8Create_type(HINSTANCE, DWORD, REFIID, LPVOID*, LPUNKNOWN);
 
+#if 0 /* shelving this */
 void print_stack(void) {
-        u32 local_var = 0x1337;
-        u32* ebp_ptr = ((uptr)&local_var)  ;
+        u32 volatile local_var = 0x1337;
+        u32 volatile* volatile ebp_ptr = &local_var  ;
         printf("ebp-4 %p: %x\n", &local_var, local_var);
-        printf('ebp   (prev sf) %p: %x\n", ')
         }
+#endif
 
 HRESULT
 DirectInput8Create(HINSTANCE hinst, DWORD dwVersion, REFIID riidltf, LPVOID* ppvOut, LPUNKNOWN punkOuter)
         {
         static HMODULE dinput_module;
-        print_stack();
         if (dinput_module == 0)
                 dinput_module = LoadLibrary(L"C:\\Windows\\SysWOW64\\dinput8.dll");
         if (dinput_module == 0) {
@@ -122,55 +122,55 @@ ATTEMPT_4(attempt_4_hook) {
         i32 counter = 0;
         i32* x = &param_1[1];
         i32* y = &param_1[2];
+        
+        void* local_player_behavior = (void*)*(uptr*)((uptr)this + 0x6c);
+        f32* lpb_dx = (f32*)((uptr)local_player_behavior + 0x84);
+        f32* lpb_dy = (f32*)((uptr)local_player_behavior + 0x88);
 
-        /*
-        if (*x > -4 && *x < 0)
-                *x = -5;
-        else if (*x > 0 && *x < 4)
-                *x = 5;
-
-        if (*y > -4 && *y < 0)
-                *y = -5;
-        else if (*y > 0 && *y < 4)
-                *y = 5;
-        */
-
-        //printf("[%d] %+d\n", counter, param_1[counter]);
-        counter += 1;
-        printf("[%d] X %+d\n", counter, param_1[counter]);
-        counter += 1;
-        printf("[%d] Y %+d\n", counter, param_1[counter]);
-        counter += 1;
-        //printf("[%d] %+d\n", counter, param_1[counter]);
-        counter += 1;
+        if (*x || *y || *lpb_dx || *lpb_dy) {
+                printf("LPB DX: %f\n", *lpb_dx);
+                printf("LPB DY: %f\n", *lpb_dy);
+                printf("  M DX: %d\n", *x);
+                printf("  M DY: %d\n", *y);
+        }
 
         // is it safe to apply the patch now that we made it here?
         u32 code_cave_size = 4096;
         u8* code_cave = VirtualAlloc(0, code_cave_size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-        unsigned char hexData[46] = {
-            0x8B, 0x86, 0x44, 0x01, 0x00, 0x00, 0xD9, 0x80, 0xAC, 0x00, 0x00, 0x00, 0xDA, 0x4C, 0x24, 0x24,
-            0xDF, 0x7C, 0x24, 0x18, 0x8B, 0x4C, 0x24, 0x18, 0x89, 0x4C, 0x24, 0x24, 0xD9, 0x80, 0xAC, 0x00,
-            0x00, 0x00, 0xDA, 0x4C, 0x24, 0x28, 0xDF, 0x7C, 0x24, 0x18, 0x8B, 0x44, 0x24, 0x18 
-        };
-        memcpy(code_cave, hexData, sizeof hexData);
+        Stream cave_stream = ZERO_STRUCT;
+        cave_stream.data = code_cave;
+        cave_stream.size = code_cave_size;
 
-        u8* target = (u8*)0x00422267;
-        u32 target_size = 46;
-        //nop_mem(target, target_size);
-        hook_jump_32(target, target_size, (uptr)code_cave);
-        hook_jump_32(code_cave + sizeof hexData, 5, (uptr)target + target_size);
+        if (0) {
+//------------------------------------------------------------
+//-----------       Created with 010 Editor        -----------
+//------         www.sweetscape.com/010editor/          ------
+//
+// File    : D:\Projects\openside\build_shellcode\mouse_patch.obj
+// Address : 260 (0x104)
+// Size    : 85 (0x55)
+//------------------------------------------------------------
+unsigned char hexData[85] = {
+    0x8B, 0x8E, 0x1C, 0x01, 0x00, 0x00, 0x8B, 0x89, 0x88, 0x00, 0x00, 0x00, 0x8B, 0x49, 0x6C, 0x8B,
+    0x86, 0x44, 0x01, 0x00, 0x00, 0xD9, 0x80, 0xAC, 0x00, 0x00, 0x00, 0xDA, 0x4C, 0x24, 0x24, 0xD9,
+    0x91, 0x84, 0x00, 0x00, 0x00, 0xDF, 0x7C, 0x24, 0x18, 0x8B, 0x44, 0x24, 0x18, 0x89, 0x44, 0x24,
+    0x24, 0x8B, 0x86, 0x44, 0x01, 0x00, 0x00, 0xD9, 0x80, 0xAC, 0x00, 0x00, 0x00, 0xDA, 0x4C, 0x24,
+    0x28, 0xD9, 0x91, 0x88, 0x00, 0x00, 0x00, 0xDF, 0x7C, 0x24, 0x18, 0x8B, 0x44, 0x24, 0x18, 0x89,
+    0x44, 0x24, 0x28, 0x8B, 0xC8 
+};
 
-        //*x = 1;
-        //*y = 0;
-        attempt_4_orig(this, xx, param_1);
+                memcpy(STREAM_AT(cave_stream), hexData, sizeof hexData);
+                cave_stream.cursor += sizeof hexData;
+
+                u8* target = (u8*)0x00422267;
+                u32 target_size = 46;
+                hook_jump_32(target, target_size, (uptr)code_cave);
+                hook_jump_32(STREAM_AT(cave_stream), 5, (uptr)target + target_size);
+        }
+        //attempt_4_orig(this, xx, param_1);
         }
 
-#define LOG(name) void __cdecl name(char const* format, ...)
-typedef LOG(log_type);
-static log_type* log_orig;
-LOG(log_hook) {
-        }
-
+/* todo: I could write a coverage tracker */
 BOOL WINAPI
 DllMain(HINSTANCE dll_instance, DWORD reason, LPVOID reserved)
         {

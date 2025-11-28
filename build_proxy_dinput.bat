@@ -12,7 +12,7 @@ if not exist !BUILD_DIR! mkdir !BUILD_DIR!
 pushd !BUILD_DIR!
 
 set LIBS=user32.lib
-cl /Fe:dinput8.dll ..\code\proxy_dinput.c /nologo /W3 /WX /Od /MD /options:strict /LD /link /incremental:no /subsystem:windows,5.1 /def:..\code\proxy_dinput.def !LIBS!
+cl /Fe:dinput8.dll ..\code\proxy_dinput.c /nologo /W3 /WX /O2 /MD /options:strict /LD /link /incremental:no /subsystem:windows,5.1 /def:..\code\proxy_dinput.def !LIBS!
 if !errorlevel! neq 0 goto error
 copy dinput8.dll "D:\Projects\openside\_game_\"
 

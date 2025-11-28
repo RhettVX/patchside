@@ -21,3 +21,12 @@ typedef u32 uptr;
 CT_ASSERT(sizeof (void*) == sizeof (uptr));
 
 #define ASSERT(cond) if ((cond) == 0) *(int volatile*)0 = 0
+#define ZERO_STRUCT {0}
+
+typedef struct Stream Stream;
+struct Stream {
+        u8* data;
+        u32 size;
+        u32 cursor;
+        };
+#define STREAM_AT(s) ((s).data + (s).cursor)
