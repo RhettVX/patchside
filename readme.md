@@ -1,1 +1,8 @@
 Fan patch attempts for the original PlanetSide.
+
+## Building the mouse patch dll
+1. Install the Visual Studio Build Tools. You'll need the Visual C++ compiler, maybe the Windows Platform SDK as well.
+2. Inside build_mouse_patch.bat, modify the path of vcvarsall.bat to match your Visual Studio installation.
+3. Run build_mouse_patch.bat.
+4. Copy dinput8.dll from build_mouse_patch\\ to your PlanetSide game folder.
+5. Run the game. A console window will open up alongside the game if it's working.
