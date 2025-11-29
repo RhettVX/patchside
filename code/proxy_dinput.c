@@ -131,7 +131,7 @@ ATTEMPT_4(attempt_4_hook) {
 
         *lpb_dx *= -1; 
 
-        if (0) {
+        if (2) {
                 printf("<%u>\n", counter);
                 //if (*x || *y || *lpb_dx || *lpb_dy) {
                 printf("LPB DX: %f\n", *lpb_dx);
@@ -150,8 +150,12 @@ ATTEMPT_4(attempt_4_hook) {
                                 cVar5 = FUN_005905d0(puVar1, xx, 0x33);
                                 if (cVar5 == 0) {
                                         /* todo: other float checks for valid value */
-                                        if (*lpb_dx != 0.0f || *lpb_dy != 0.0f)
+                                        if (*lpb_dx != 0.0f || *lpb_dy != 0.0f) {
                                                 *(u32*)puVar1 = *(u32*)puVar1 | 4;
+                                                }
+                                        else {
+                                                *(u32 *)puVar1 = *(u32 *)puVar1 & 0xfffffffb;
+                                                }
                                         }
                                 }
                         }
@@ -191,10 +195,22 @@ ATTEMPT_4(attempt_4_hook) {
                 u32 target_size = 46;
                 hook_jump_32(target, target_size, (uptr)code_cave);
                 hook_jump_32(STREAM_AT(cave_stream), 5, (uptr)target + target_size);
+
+
+                //nop_mem((u8*)0x00748c80, 1307);
         }
         counter += 1;
         if (use_our_code == 0)
                 attempt_4_orig(this, xx, param_1);
+        }
+
+typedef void* LocalPlayerBehavior;
+#define DOES_MOUSE_MATH(name) u32 __fastcall name(LocalPlayerBehavior* this, void* xx, f32 dt)
+typedef DOES_MOUSE_MATH(does_mouse_math_type);
+static does_mouse_math_type* does_mouse_math_orig;
+DOES_MOUSE_MATH(does_mouse_math_hook) {
+        printf("dt: %f\n", dt);
+        return does_mouse_math_orig(this, xx, dt);
         }
 
 BOOL WINAPI
@@ -210,6 +226,7 @@ DllMain(HINSTANCE dll_instance, DWORD reason, LPVOID reserved)
                 //attempt_3_orig = hook_trampoline_32((u8*)0x00422030, 5, (uptr)attempt_3_hook);
                 //log_orig = hook_trampoline_32((u8*)0x00868c90, 5, (uptr)log_hook);
                 attempt_4_orig = hook_trampoline_32((u8*)0x00572680, 5, (uptr)attempt_4_hook);
+                does_mouse_math_orig = hook_trampoline_32((u8*)0x00748920, 6, (uptr)does_mouse_math_hook);
                 }
         
         return TRUE;
