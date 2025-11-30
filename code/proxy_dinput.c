@@ -131,7 +131,7 @@ ATTEMPT_4(attempt_4_hook) {
 
         *lpb_dx *= -1; 
 
-        if (2) {
+        if (0) {
                 printf("<%u>\n", counter);
                 //if (*x || *y || *lpb_dx || *lpb_dy) {
                 printf("LPB DX: %f\n", *lpb_dx);
@@ -190,14 +190,35 @@ ATTEMPT_4(attempt_4_hook) {
 
                 memcpy(STREAM_AT(cave_stream), hexData, sizeof hexData);
                 cave_stream.cursor += sizeof hexData;
-
                 u8* target = (u8*)0x00422267;
                 u32 target_size = 46;
                 hook_jump_32(target, target_size, (uptr)code_cave);
                 hook_jump_32(STREAM_AT(cave_stream), 5, (uptr)target + target_size);
 
+                if (0) {
+                unsigned char hexData_2[16] = {
+                    0x89, 0x4C, 0x24, 0x34, 0x01, 0x7C, 0x24, 0x68, 0x01, 0x7C, 0x24, 0x38, 0x89, 0x6C, 0x24, 0x3C 
+                };
 
+                u8* jump_loc = STREAM_AT(cave_stream);
+                memcpy(STREAM_AT(cave_stream), hexData_2, sizeof hexData_2);
+                cave_stream.cursor += sizeof hexData_2;
+
+                target = (u8*)0x00748db8;
+                target_size = 18;
+                hook_jump_32(target, target_size, (uptr)jump_loc);
+                hook_jump_32(STREAM_AT(cave_stream), 5, (uptr)target + target_size);
+                }
+
+                //whole block
                 //nop_mem((u8*)0x00748c80, 1307);
+
+                // infantry movement
+                //nop_mem((u8*)0x00749256, 1927);
+
+                //nop_mem((u8*)0x00749119, 83);
+
+                //nop_mem((u8*)0x00748db4, 22);
         }
         counter += 1;
         if (use_our_code == 0)
@@ -213,6 +234,66 @@ DOES_MOUSE_MATH(does_mouse_math_hook) {
         return does_mouse_math_orig(this, xx, dt);
         }
 
+typedef void* Avatar;
+typedef void __fastcall FUN_004a0c00_type(Avatar* this, void* xx, u32 param_1);
+static FUN_004a0c00_type* FUN_004a0c00 = (void*)0x004a0c00;
+
+#define MOVE_HEAD(name) void __fastcall name(Avatar* this, void* xx, u32* param_1)
+typedef MOVE_HEAD(move_head_type);
+static move_head_type* move_head_orig;
+MOVE_HEAD(move_head_hook) {
+        i32* this_head_orient_x = (i32*)((uptr)this + 0x228);
+        i32* this_head_orient_y = (i32*)((uptr)this + 0x22c);
+        i32* this_head_orient_z = (i32*)((uptr)this + 0x230);
+        i32 prev_head_orient_x = *this_head_orient_x;
+        i32 prev_head_orient_y = *this_head_orient_y;
+        i32 prev_head_orient_z = *this_head_orient_z;
+
+        *this_head_orient_x = param_1[0];
+        *this_head_orient_y = param_1[1];
+        *this_head_orient_z = param_1[2];
+
+        i32 uVar1 = (*this_head_orient_z) & 0x80003fff;
+        if (uVar1 < 0) {
+                uVar1 -= 1;
+                uVar1 |= 0xffffc000;
+                uVar1 += 1;
+                *this_head_orient_z = uVar1;
+                }
+
+        if ((*this_head_orient_x != prev_head_orient_x)
+            || (*this_head_orient_y != prev_head_orient_y)
+            || (*this_head_orient_z != prev_head_orient_z)) {
+                FUN_004a0c00(this, xx, 0x87);
+                }
+
+        //move_head_orig(this, xx, param_1);
+        }
+
+#define FUN_004450d0_MACRO(name) void __fastcall name(void* this, void* xx, u32 param_1, u32 param_2,u32 param_3,u32 param_4,u32 param_5,u32 param_6,u32 param_7,u32 param_8,u32 param_9,u32 param_10,u32 param_11,u32 param_12,u32 param_13,u32 param_14,u32 param_15,u32 param_16,u32 param_17)
+typedef FUN_004450d0_MACRO(FUN_004450d0_type);
+static FUN_004450d0_type* FUN_004450d0_orig;
+FUN_004450d0_MACRO(FUN_004450d0) {
+        EVAL(param_1);
+        EVAL(param_2);
+        EVAL(param_3);
+        EVAL(param_4);
+        EVAL(param_5);
+        EVAL(param_6);
+        EVAL(param_7);
+        EVAL(param_8);
+        EVAL(param_9);
+        EVAL(param_10);
+        EVAL(param_11);
+        EVAL(param_12);
+        EVAL(param_13);
+        EVAL(param_14);
+        EVAL(param_15);
+        EVAL(param_16);
+        EVAL(param_17);
+        FUN_004450d0_orig(this, xx, param_1, param_2, param_3, param_4, param_5, param_6, param_7, param_8, param_9, param_10, param_11, param_12, param_13, param_14, param_15, param_16, param_17);       
+        }
+
 BOOL WINAPI
 DllMain(HINSTANCE dll_instance, DWORD reason, LPVOID reserved)
         {
@@ -226,7 +307,9 @@ DllMain(HINSTANCE dll_instance, DWORD reason, LPVOID reserved)
                 //attempt_3_orig = hook_trampoline_32((u8*)0x00422030, 5, (uptr)attempt_3_hook);
                 //log_orig = hook_trampoline_32((u8*)0x00868c90, 5, (uptr)log_hook);
                 attempt_4_orig = hook_trampoline_32((u8*)0x00572680, 5, (uptr)attempt_4_hook);
-                does_mouse_math_orig = hook_trampoline_32((u8*)0x00748920, 6, (uptr)does_mouse_math_hook);
+                //does_mouse_math_orig = hook_trampoline_32((u8*)0x00748920, 6, (uptr)does_mouse_math_hook);
+                move_head_orig = hook_trampoline_32((u8*)0x008fb2b0, 6, (uptr)move_head_hook);
+                FUN_004450d0_orig = hook_trampoline_32((u8*)0x004450d0, 7, (uptr)FUN_004450d0);
                 }
         
         return TRUE;

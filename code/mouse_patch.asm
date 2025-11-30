@@ -15,7 +15,7 @@ mov    ecx,dword ptr [ecx+06ch]  ; loads LocalPlayerBehavior to ecx
 ; [esp+028h]    int dy
 ;  eax          Settings*
 ;  ecx          LocalPlayerBehavior*
-; [eax+0xac]    mouse sensitivity
+; [eax+0ach]    mouse sensitivity
 ;-- dx
 mov    eax,DWORD PTR [esi+0144h] ; loads settings into eax
 fld    DWORD PTR [eax+0ach]      ; loads mouse sens to fp stack, st(0) I think?
@@ -53,8 +53,18 @@ fistp  QWORD PTR [esp+18h]
 mov    eax,DWORD PTR [esp+18h]
 original ends
 
-patch2 segment ; 004222ac
 
+patch2 segment ; 00748db8
+mov    DWORD PTR [esp+034h],ecx
+; je     03b9h
+
+add    DWORD PTR [esp+068h],edi
+; mov    DWORD PTR [esp+038h],00h
+; mov    DWORD PTR [esp+03ch],ebp
+; jmp    026h 
+
+add    DWORD PTR [esp+038h],edi
+mov    DWORD PTR [esp+03ch],ebp
 patch2 ends
 
 end
