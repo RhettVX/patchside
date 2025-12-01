@@ -294,6 +294,56 @@ FUN_004450d0_MACRO(FUN_004450d0) {
         FUN_004450d0_orig(this, xx, param_1, param_2, param_3, param_4, param_5, param_6, param_7, param_8, param_9, param_10, param_11, param_12, param_13, param_14, param_15, param_16, param_17);       
         }
 
+#define FUN_00499370_MACRO(name) void __fastcall name(void* this, void* xx, f32* pos, i32* orient, u8 param_4)
+typedef FUN_00499370_MACRO(FUN_00499370_type);
+static FUN_00499370_type* FUN_00499370_orig;
+FUN_00499370_MACRO(FUN_00499370_hook) {
+        volatile u32 var = 0x1337;
+        printf("Return to %08x\n", *(u32*)((&pos)-1));
+        EVAL(this);
+        printf("CamPos x:%-11.2f y:%-11.2f z:%-11.2f\n", pos[0], pos[1], pos[2]);
+        printf("CamRot x:%-5d y:%-5d z:%-5d\n", orient[0], orient[1], orient[2]);
+        EVAL(param_4);
+        FUN_00499370_orig(this, xx, pos, orient, param_4);
+        }
+
+typedef struct Matrix4x4 Matrix4x4;
+struct Matrix4x4 {
+        f32 m00; f32 m01; f32 m02; f32 m03;
+        f32 m10; f32 m11; f32 m12; f32 m13;
+        f32 m20; f32 m21; f32 m22; f32 m23;
+        f32 m30; f32 m31; f32 m32; f32 m33;
+        };
+
+#define FUN_0041a1f0_MACRO(name) void name(Matrix4x4* M,f32 param_2,f32 param_3,f32 param_4,f32 param_5,f32 param_6,f32 param_7)
+typedef FUN_0041a1f0_MACRO(FUN_0041a1f0_type);
+static FUN_0041a1f0_type* FUN_0041a1f0_orig;
+FUN_0041a1f0_MACRO(FUN_0041a1f0_hook) {
+        if (M == (void*)0x00CCE630) {
+                printf("RetAddr: 0x%08x\n", *(u32*)(((u8*)&M)-4));
+                printf("apply to %p\n", M);
+                printf("2: %f 3: %f 4: %f 5: %f 6: %f 7: %f\n", param_2, param_3, param_4, param_5, param_6, param_7);
+                M->m00 = param_3 * param_4;                               M->m01 = param_3 * param_7;                               M->m02 = -param_6;          M->m03 = 0.0f;
+                M->m10 = param_6 * param_4 * param_5 - param_2 * param_7; M->m11 = param_5 * param_6 * param_7 + param_2 * param_4; M->m12 = param_3 * param_5; M->m13 = 0.0f;
+                M->m20 = param_5 * param_7 + param_2 * param_4 * param_6; M->m21 = param_2 * param_6 * param_7 - param_4 * param_5; M->m22 = param_2 * param_3; M->m23 = 0.0f;
+                M->m30 = 0.0f;                                            M->m31 = 0.0f;                                            M->m32 = 0.0f;              M->m33 = 1.0f;
+                return;
+                }
+        FUN_0041a1f0_orig(param_1, param_2, param_3, param_4, param_5, param_6, param_7);
+        }
+
+#define FUN_0041a170_MACRO(name) void __fastcall name(f32* this, void* xx, u32* param_1)
+typedef FUN_0041a170_MACRO(FUN_0041a170_type);
+static FUN_0041a170_type* FUN_0041a170_orig;
+FUN_0041a170_MACRO(FUN_0041a170_hook) {
+        if (this == (void*)0x00CCE630) {
+                printf("RetAddr: 0x%08x\n", *(u32*)(((u8*)&param_1)-4));
+                printf("apply to %p\n", this);
+                printf("x:%d y:%d z:%d\n", param_1[0], param_1[1], param_1[2]);
+        }
+        FUN_0041a170_orig(this, xx, param_1);
+        }
+
 BOOL WINAPI
 DllMain(HINSTANCE dll_instance, DWORD reason, LPVOID reserved)
         {
@@ -306,10 +356,13 @@ DllMain(HINSTANCE dll_instance, DWORD reason, LPVOID reserved)
                 //fun_00415c80_orig = hook_trampoline_32((u8*)0x00415c80, 8, (uptr)test_hook);
                 //attempt_3_orig = hook_trampoline_32((u8*)0x00422030, 5, (uptr)attempt_3_hook);
                 //log_orig = hook_trampoline_32((u8*)0x00868c90, 5, (uptr)log_hook);
-                attempt_4_orig = hook_trampoline_32((u8*)0x00572680, 5, (uptr)attempt_4_hook);
+                //attempt_4_orig = hook_trampoline_32((u8*)0x00572680, 5, (uptr)attempt_4_hook);
                 //does_mouse_math_orig = hook_trampoline_32((u8*)0x00748920, 6, (uptr)does_mouse_math_hook);
-                move_head_orig = hook_trampoline_32((u8*)0x008fb2b0, 6, (uptr)move_head_hook);
-                FUN_004450d0_orig = hook_trampoline_32((u8*)0x004450d0, 7, (uptr)FUN_004450d0);
+                //move_head_orig = hook_trampoline_32((u8*)0x008fb2b0, 6, (uptr)move_head_hook);
+                //FUN_004450d0_orig = hook_trampoline_32((u8*)0x004450d0, 7, (uptr)FUN_004450d0);
+                //FUN_00499370_orig = hook_trampoline_32((u8*)0x00499370, 6, (uptr)FUN_00499370_hook);
+                FUN_0041a1f0_orig = hook_trampoline_32((u8*)0x0041a1f0, 8, (uptr)FUN_0041a1f0_hook);
+                FUN_0041a170_orig = hook_trampoline_32((u8*)0x0041a170, 5, (uptr)FUN_0041a170_hook);
                 }
         
         return TRUE;
