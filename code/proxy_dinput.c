@@ -25,7 +25,7 @@ DirectInput8Create(HINSTANCE hinst, DWORD dwVersion, REFIID riidltf, LPVOID* ppv
         {
         static HMODULE dinput_module;
         if (dinput_module == 0)
-                dinput_module = LoadLibrary(L"C:\\Windows\\SysWOW64\\dinput8.dll");
+                dinput_module = LoadLibrary(L"dinput8_wine.dll");
         if (dinput_module == 0) {
                 MessageBox(0, L"Unable to load original module", 0, MB_OK | MB_ICONEXCLAMATION);
                 ExitProcess(1);
@@ -329,7 +329,7 @@ FUN_0041a1f0_MACRO(FUN_0041a1f0_hook) {
                 M->m30 = 0.0f;                                            M->m31 = 0.0f;                                            M->m32 = 0.0f;              M->m33 = 1.0f;
                 return;
                 }
-        FUN_0041a1f0_orig(param_1, param_2, param_3, param_4, param_5, param_6, param_7);
+        FUN_0041a1f0_orig(M, param_2, param_3, param_4, param_5, param_6, param_7);
         }
 
 #define FUN_0041a170_MACRO(name) void __fastcall name(f32* this, void* xx, u32* param_1)
